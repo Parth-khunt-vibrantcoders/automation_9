@@ -11,6 +11,7 @@ use App\Exports\BrandExport;
 use App\Exports\BrandExportNew;
 use App\Models\Device;
 use App\Models\Mobilenumber;
+use Symfony\Component\Process\Process;
 
 class BrandentryController extends Controller
 {
@@ -223,12 +224,12 @@ class BrandentryController extends Controller
 
     public function run_script(Request $request){
         ini_set('max_execution_time', '0'); // for infinite time of execution
-
         $logindata = Auth()->guard('admin')->user();
         Excel::store(new BrandExportNew($request->all()), str_replace(' ', '_', $logindata['first_name'])."_".str_replace(' ', '_', $logindata['last_name'])."_".$logindata['user_no'].'/comviva/data/BrandDetails.xlsx', 'exceldata');
-
-        $path = "D:/xampp/htdocs/automation/public/backend_automation/".str_replace(' ', '_', $logindata['first_name'])."_".str_replace(' ', '_', $logindata['last_name'])."_".$logindata['user_no']."/runner.bat";
-        if(exec($path)){
+        $path = "D:/xampp/htdocs/automation/public/backend_automation/".str_replace(' ', '_', $logindata['first_name'])."_".str_replace(' ', '_', $logindata['last_name'])."_".$logindata['user_no']."/comviva/runner.py";
+        $process = new Process(['python', $path]);
+        // G:\xampp\htdocs\automation_new\public\backend_automation\Admin_Admin_0\comviva\runner.py
+        if($process){
             $return['status'] = 'success';
             $return['jscode'] = '$(".submitbtn:visible").removeAttr("disabled");$("#loader").hide();';
             $return['message'] = 'Brand execution successfully completed';
