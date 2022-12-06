@@ -12,6 +12,7 @@ use App\Exports\BrandExportNew;
 use App\Models\Device;
 use App\Models\Mobilenumber;
 use Symfony\Component\Process\Process;
+use Symfony\Component\Process\Exception\ProcessFailedException;
 
 class BrandentryController extends Controller
 {
@@ -223,13 +224,15 @@ class BrandentryController extends Controller
     }
 
     public function run_script(Request $request){
+
         ini_set('max_execution_time', '0'); // for infinite time of execution
+
         $logindata = Auth()->guard('admin')->user();
         Excel::store(new BrandExportNew($request->all()), str_replace(' ', '_', $logindata['first_name'])."_".str_replace(' ', '_', $logindata['last_name'])."_".$logindata['user_no'].'/comviva/data/BrandDetails.xlsx', 'exceldata');
         $path = "D:/xampp/htdocs/automation/public/backend_automation/".str_replace(' ', '_', $logindata['first_name'])."_".str_replace(' ', '_', $logindata['last_name'])."_".$logindata['user_no']."/comviva/runner.py";
-        $process = new Process(['python', $path]);
-        // G:\xampp\htdocs\automation_new\public\backend_automation\Admin_Admin_0\comviva\runner.py
-        if($process){
+        $output_data = system("python D:/xampp/htdocs/automation/public/backend_automation/".str_replace(' ', '_', $logindata['first_name'])."_".str_replace(' ', '_', $logindata['last_name'])."_".$logindata['user_no']."/comviva/runner.py");
+        //ccd($output_data);
+        if(exec($output_data)){
             $return['status'] = 'success';
             $return['jscode'] = '$(".submitbtn:visible").removeAttr("disabled");$("#loader").hide();';
             $return['message'] = 'Brand execution successfully completed';
@@ -242,5 +245,27 @@ class BrandentryController extends Controller
         }
         echo json_encode($return);
         exit;
+
+        
+        // ini_set('max_execution_time', '0'); // for infinite time of execution
+        // $logindata = Auth()->guard('admin')->user();
+        // Excel::store(new BrandExportNew($request->all()), str_replace(' ', '_', $logindata['first_name'])."_".str_replace(' ', '_', $logindata['last_name'])."_".$logindata['user_no'].'/comviva/data/BrandDetails.xlsx', 'exceldata');
+        // $path = "D:/xampp/htdocs/automation/public/backend_automation/".str_replace(' ', '_', $logindata['first_name'])."_".str_replace(' ', '_', $logindata['last_name'])."_".$logindata['user_no']."/comviva/runner.py";
+        // // ccd();
+        // $process = new Process(['python3.9', base_path("backend_automation/Admin_Admin_0/comviva/runner.py")]);
+        // // G:\xampp\htdocs\automation_new\public\backend_automation\Admin_Admin_0\comviva\runner.py
+        // if($process){
+        //     $return['status'] = 'success';
+        //     $return['jscode'] = '$(".submitbtn:visible").removeAttr("disabled");$("#loader").hide();';
+        //     $return['message'] = 'Brand execution successfully completed';
+        //     $return['redirect'] = route('brand-entry-list');
+        // } else {
+        //     $return['status'] = 'error';
+        //     $return['jscode'] = '$(".submitbtn:visible").removeAttr("disabled");$("#loader").hide();';
+        //     $return['message'] = 'Something goes to wrong';
+        //     $return['redirect'] = route('brand-entry-list');
+        // }
+        // echo json_encode($return);
+        // exit;
     }
 }
